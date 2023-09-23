@@ -14,11 +14,11 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: CommentRepository::class)]
 #[ApiResource(
     operations: [
-        new Get(),
-        new GetCollection(),
-        new Post(),
-        new Delete()
+        new Get(security: "is_granted('ROLE_USER')"),
+        new Post(security: "is_granted('ROLE_USER')"),
+        new Delete(security: "is_granted('ROLE_USER')")
     ],
+    security: "is_granted('ROLE_USER')"
 )]
 class Comment
 {
