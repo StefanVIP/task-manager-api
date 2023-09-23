@@ -6,17 +6,36 @@ use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 
 class CommentTest extends ApiTestCase
 {
-    public function testGetAllComment(): void
+    public function getJsonWithToken(): array
     {
-        $response = static::createClient()->request(method: 'GET', url: '/api/comments');
+        $response = static::createClient()->request(method: 'POST', url: '/api/login_check', options: [
+            "json" => [
+                'username' => 'test1@test.com',
+                'password' => 'Pass321321',
+            ]
+        ]);
+
+        return $response->toArray();
+    }
+
+    public function testGetComment(): void
+    {
+        $json = $this->getJsonWithToken();
+
+        $response = static::createClient()->request(method: 'GET', url: '/api/comments/1', options: [
+            'auth_bearer' => $json['token']
+        ]);
 
         $this->assertResponseIsSuccessful();
-        $this->assertJsonContains(["hydra:totalItems" => 1]);
+        $this->assertJsonContains(["commentText" => "Тестовый комментарий"]);
     }
 
     public function testPostComment(): void
     {
+        $json = $this->getJsonWithToken();
+
         $response = static::createClient()->request(method: 'POST', url: '/api/comments', options: [
+            'auth_bearer' => $json['token'],
             "json" => [
                 "commentText" => "Test comment",
                 "task" => "/api/tasks/1"]
@@ -28,21 +47,22 @@ class CommentTest extends ApiTestCase
 
     public function testCommentConnectToTask(): void
     {
-        $response = static::createClient()->request(method: 'POST', url: '/api/comments', options: [
-            "json" => [
-                "commentText" => "Test comment",
-                "task" => "/api/tasks/1"]
+        $json = $this->getJsonWithToken();
+
+        $response = static::createClient()->request(method: 'GET', url: '/api/tasks/1', options: [
+            'auth_bearer' => $json['token']
         ]);
-
-        $response = static::createClient()->request(method: 'GET', url: '/api/tasks/1');
-
 
         $this->assertStringContainsString('\/api\/comments\/', $response->getContent());
     }
 
     public function testDeleteComment(): void
     {
-        $response = static::createClient()->request(method: 'DELETE', url: '/api/comments/1');
+        $json = $this->getJsonWithToken();
+
+        $response = static::createClient()->request(method: 'DELETE', url: '/api/comments/1', options: [
+            'auth_bearer' => $json['token']
+        ]);
 
         $this->assertResponseIsSuccessful();
     }
