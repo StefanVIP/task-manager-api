@@ -19,15 +19,39 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: TaskRepository::class)]
 #[ApiResource(
     operations: [
-                new Get(),
-                new GetCollection(),
-                new Post(denormalizationContext: ['groups' => 'task:write']),
-                new Put(denormalizationContext: ['groups' => 'task:write']),
-                new Patch(uriTemplate: '/tasks/{id}/done', denormalizationContext: ['groups' => 'task:status']),
-                new Delete()
-            ],
-        order: ['createDate' => 'ASC'],
+        new Get(
+            normalizationContext: ['groups' => 'task:item'],
+            securityPostDenormalize: "is_granted('ROLE_USER') and object.user == user",
+            securityPostDenormalizeMessage: 'Sorry, but you are not the task owner.'
+        ),
+        new GetCollection(
+            paginationMaximumItemsPerPage: 10,
+            normalizationContext: ['groups' => 'task:list']
+        ),
+        new Post(
+            denormalizationContext: ['groups' => 'task:write'],
+            securityPostDenormalize: "is_granted('ROLE_USER')",
+            securityPostDenormalizeMessage: 'Sorry, but you are not the actual task owner.'
+        ),
+        new Patch(
+            uriTemplate: '/tasks/{id}',
+            denormalizationContext: ['groups' => 'task:write'],
+            security: "is_granted('ROLE_USER') and object.user == user",
+            securityPostDenormalizeMessage: 'Sorry, but you are not the actual task owner.'
+        ),
+        new Patch(
+            uriTemplate: '/tasks/{id}/done',
+            denormalizationContext: ['groups' => 'task:status'],
+            security: "is_granted('ROLE_USER') and object.user == user",
+            securityPostDenormalizeMessage: 'Sorry, but you are not the actual task owner.'
+        ),
+        new Delete(securityPostDenormalize: "is_granted('ROLE_USER') and object.user == user",
+            securityPostDenormalizeMessage: 'Sorry, but you are not the actual task owner.'
+        )
+    ],
+    order: ['createDate' => 'ASC'],
     paginationEnabled: true,
+    security: "is_granted('ROLE_USER')"
 )]
 class Task
 {
@@ -59,6 +83,10 @@ class Task
 
     #[ORM\OneToMany(mappedBy: 'task', targetEntity: Comment::class, cascade: ['persist', 'remove'])]
     private Collection $comments;
+
+    #[ORM\ManyToOne(inversedBy: 'tasks')]
+    #[ORM\JoinColumn(nullable: false)]
+    public ?User $user = null;
 
     public function getId(): ?int
     {
@@ -125,6 +153,7 @@ class Task
         return $this;
     }
 
+    #[Groups(['task:list', 'task:item'])]
     /**
      * @return Collection<int, Comment>
      */
@@ -151,6 +180,18 @@ class Task
                 $comment->setTask(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }
