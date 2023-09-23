@@ -12,7 +12,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 /**
  * Restrict Task collection to current user.
  */
-final readonly class TaskQueryCollectionExtension implements QueryCollectionExtensionInterface
+final class TaskQueryCollectionExtension implements QueryCollectionExtensionInterface
 {
     public function __construct(private readonly Security $security)
     {
@@ -33,6 +33,6 @@ final readonly class TaskQueryCollectionExtension implements QueryCollectionExte
 
         $rootAlias = $queryBuilder->getRootAliases()[0];
         $queryBuilder->andWhere(sprintf('%s.user = :current_user', $rootAlias));
-        $queryBuilder->setParameter('current_user', $user->getId());
+        $queryBuilder->setParameter('current_user', $user);
     }
 }
