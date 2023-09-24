@@ -13,30 +13,33 @@ This application is a demonstration of API for task manager. Made by using Docke
 You can drop and recreate DB if you want by these commands:
 
 Drop DB
-$ docker exec -it symfony_dockerized-php-1 bin/console doctrine:database:drop --force
+
+    $ docker exec -it symfony_dockerized-php-1 bin/console doctrine:database:drop --force
 Create DB
-$ docker exec -it symfony_dockerized-php-1 bin/console doctrine:database:create
+
+    $ docker exec -it symfony_dockerized-php-1 bin/console doctrine:database:create
 Run migrations
-$ docker exec -it symfony_dockerized-php-1 bin/console doctrine:migrations:migrate
+
+    $ docker exec -it symfony_dockerized-php-1 bin/console doctrine:migrations:migrate
 
 You can do the same for testing environment, if you need to:
 
-$ bin/console doctrine:database:create --env=test
-$ bin/console doctrine:migration:migrate --env=test
-$ bin/console --env=test doctrine:fixtures:load
+    $ bin/console doctrine:database:create --env=test
+    $ bin/console doctrine:migration:migrate --env=test
+    $ bin/console --env=test doctrine:fixtures:load
 
 ## API Testing
-
-All entities used in this project are thoroughly tested. Each test class extends
-the `ApiTestCase`, which contains specific API assertions.
 
 You can now go to https://localhost/api/ and see all documentation.
 
 For creating user use https://localhost/api/register with json:
 
-$ {
-$ "email": "string",
-$ "password": "string"
-$ }
+    $ {
+    $ "email": "string",
+    $ "password": "string"
+    $ }
 
 For check user token use https://localhost/api/login_check with same json.
+
+All entities used in this project are tested. Each test class extends
+the `ApiTestCase`, which contains specific API assertions.
