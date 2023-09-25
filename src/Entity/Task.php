@@ -54,35 +54,43 @@ use Doctrine\ORM\Mapping as ORM;
 )]
 class Task
 {
+    /** The unique id of task. */
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['task:list', 'task:item'])]
     private ?int $id = null;
 
+    /** The title of task. */
     #[ORM\Column(type: Types::STRING, length: 255)]
     #[Groups(['task:list', 'task:item', 'task:write'])]
     private ?string $title = null;
 
+    /** The description of task. */
     #[ORM\Column(type: Types::TEXT)]
     #[Groups(['task:list', 'task:item', 'task:write'])]
     private ?string $description = null;
 
+    /** The date of creating task. */
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     #[Groups(['task:list', 'task:item'])]
     private ?\DateTimeImmutable $createDate;
 
+    /** The planned date of completing task. */
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['task:list', 'task:item', 'task:write'])]
     private ?\DateTimeInterface $completeDate = null;
 
+    /** The status of task - undone/done. */
     #[ORM\Column(type: Types::BOOLEAN)]
     #[Groups(['task:list', 'task:item', 'task:status'])]
     private ?bool $status;
 
+    /** Created comments for task. */
     #[ORM\OneToMany(mappedBy: 'task', targetEntity: Comment::class, cascade: ['persist', 'remove'])]
     private Collection $comments;
 
+    /** The owner of task. */
     #[ORM\ManyToOne(inversedBy: 'tasks')]
     #[ORM\JoinColumn(nullable: false)]
     public ?User $user = null;

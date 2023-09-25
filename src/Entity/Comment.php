@@ -21,14 +21,17 @@ use Doctrine\ORM\Mapping as ORM;
 )]
 class Comment
 {
+    /** The unique id of comment. */
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
+    /** The text of comment. */
     #[ORM\Column(type: Types::TEXT)]
     private ?string $commentText = null;
 
+    /** The task for which the comment was written. */
     #[ORM\ManyToOne(targetEntity: Task::class, inversedBy: 'comments')]
     private ?Task $task = null;
 
